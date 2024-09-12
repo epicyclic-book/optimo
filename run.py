@@ -13,10 +13,12 @@ import random
 
 problem_list = ['ch3', 'ch4', 'ch5', 'ch6a', 'ch6b', 'ch7a', 'ch7b']
 algorithm_list = ['pso', 'sa', 'aco', 'nsga2']
+format_list = ['png', 'pdf', 'svg']
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-p', '--problem', choices=problem_list, type=str, required=True)
 parser.add_argument('-a', '--algorithm', choices=algorithm_list, type=str, required=True)
+parser.add_argument('-f', '--formats', nargs='+', choices=format_list, type=str, default=['png'])
 parser.add_argument('-o', '--output', type=str, default='')
 parser.add_argument('-d', '--debug', action='store_true')
 
@@ -74,6 +76,7 @@ if args.debug:
 
 alg.run()
 
-alg.set_outpath(args.output)
+alg.set_path(args.output)
+alg.set_formats(args.formats)
 alg.save()
 

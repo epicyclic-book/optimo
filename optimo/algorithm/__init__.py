@@ -37,7 +37,8 @@ class Algorithm:
 
     self.prepare_config()
 
-    self.outpath = ""
+    self.formats = ['png']
+    self.path = ''
 
     self.population = []
     self.archive = []
@@ -56,9 +57,13 @@ class Algorithm:
     if not self.ref_data:
       self.ref_data = self.bounds_min[:]
 
-  def set_outpath(self, path):
+  def set_path(self, path):
     if os.path.isdir(path):
-      self.outpath = path
+      self.path = path
+
+  def set_formats(self, formats):
+    format_list = {'png', 'pdf', 'svg'}
+    self.formats = set(formats) & format_list
 
   def evaluate(self, v, obj, con):
     obj.clear()
@@ -85,9 +90,9 @@ class Algorithm:
 
     assert len(self.bounds_min) == self.num_vars
     assert len(self.bounds_max) == self.num_vars
-    assert len(self.var_names) == self.num_vars
     assert len(self.obj_names) == self.num_obj
     assert len(self.constr_names) == self.num_constr
+    assert len(self.var_names) == self.num_vars
     assert len(self.var_names) == len(self.var_types)
     assert all([obj in self.obj_names for p in self.plot_data for obj in p])
     assert all([2 <= len(p) <= 3 for p in self.plot_data])
@@ -106,15 +111,16 @@ class Algorithm:
   def report(self):
     pop = self.archive
     header = self.obj_names + self.constr_names + self.var_names
-    output = os.path.join(self.outpath, "results.csv")
+    output = os.path.join(self.path, 'results')
     Report(pop, header, self.var_types, output)
 
   def plot(self):
     pop = self.archive
     data = copy.deepcopy(pop)
 
-    for n, labels in enumerate(self.plot_data):
-      indices = [self.obj_names.index(p) for p in labels]
+    for n, header in enumerate(self.plot_data):
+      indices = [self.obj_names.index(p) for p in header]
+
       for d, p in zip(data, pop):
         d.best_fitness = [p.best_fitness[i] for i in indices]
 
@@ -124,8 +130,8 @@ class Algorithm:
         (FilterNonDominated(data), 'red', '^')
       )
 
-      output = os.path.join(self.outpath, f"plot{n+1}.png")
-      Plot(dataset, labels, output)
+      output = os.path.join(self.path, f'plot{n+1}')
+      Plot(dataset, header, output, self.formats)
 
 #####################
 # Genetic Algorithm #

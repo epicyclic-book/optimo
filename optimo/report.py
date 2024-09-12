@@ -19,44 +19,45 @@ font = {
 # Plotting functions #
 ######################
 
-def Create2DPlot(labels):
+def Create2DPlot(header):
   fig = pyplot.figure()
   ax = fig.add_subplot()
-  ax.set_xlabel(labels[0], fontdict=font)
-  ax.set_ylabel(labels[1], fontdict=font)
+  ax.set_xlabel(header[0], fontdict=font)
+  ax.set_ylabel(header[1], fontdict=font)
   return fig, ax
 
-def Create3DPlot(labels):
+def Create3DPlot(header):
   fig = pyplot.figure()
   ax = fig.add_subplot(projection='3d')
-  ax.set_xlabel(labels[0], fontdict=font)
-  ax.set_ylabel(labels[1], fontdict=font)
-  ax.set_zlabel(labels[2], fontdict=font)
+  ax.set_xlabel(header[0], fontdict=font)
+  ax.set_ylabel(header[1], fontdict=font)
+  ax.set_zlabel(header[2], fontdict=font)
   return fig, ax
 
-def Plot(dataset, labels, output):
-  n = len(labels)
+def Plot(dataset, header, output, formats=['png']):
+  n = len(header)
   if not 2 <= n <= 3:
     return
 
   if n == 2:
-    fig, ax = Create2DPlot(labels)
+    fig, ax = Create2DPlot(header)
   else:
-    fig, ax = Create3DPlot(labels)
+    fig, ax = Create3DPlot(header)
 
   dataset = [s for s in dataset if s[0]]
   for data, color, marker in dataset:
     points = zip(*(map(abs, p.best_fitness[:n]) for p in data))
     ax.scatter(*points, c=color, marker=marker)
 
-  fig.savefig(output)
+  for fmt in formats:
+    fig.savefig(f'{output}.{fmt}', dpi=300)
 
 ####################
 # Report solutions #
 ####################
 
 def Report(pop, header, types, output):
-  with open(output, 'w', newline='') as f:
+  with open(f'{output}.csv', 'w', newline='') as f:
     fieldnames = tuple(header) + ('Feasibility', 'Crowding Distance', 'COF')
     writer = csv.DictWriter(f, fieldnames=fieldnames, quoting=csv.QUOTE_ALL)
     writer.writeheader()
