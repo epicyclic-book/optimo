@@ -30,6 +30,7 @@ class Algorithm:
     self.num_archive = config.get('num_archive', 200)
 
     self.obj_names = config.get('obj_names', [])
+    self.obj_types = config.get('obj_types', [])
     self.constr_names = config.get('constr_names', [])
     self.var_names = config.get('var_names', [])
     self.var_types = config.get('var_types', [])
@@ -46,6 +47,8 @@ class Algorithm:
   def prepare_config(self):
     if not self.obj_names:
       self.obj_names = [f'f{i+1}' for i in range(self.num_obj)]
+    if not self.obj_types:
+      self.obj_types = ['min' for i in range(self.num_obj)]
     if not self.constr_names:
       self.constr_names = [f'c{i+1}' for i in range(self.num_constr)]
     if not self.var_names:
@@ -64,6 +67,14 @@ class Algorithm:
   def set_formats(self, formats):
     format_list = {'png', 'pdf', 'svg'}
     self.formats = set(formats) & format_list
+
+  def varmap(self, v):
+    process = lambda x, t: math.ceil(x) if t == 'int' else x
+    return map(process, v, self.var_types)
+
+  def objmap(self, v):
+    process = lambda x, t: -x if t == 'max' else x
+    return map(process, v, self.obj_types)
 
   def evaluate(self, v, obj, con):
     obj.clear()
@@ -91,6 +102,7 @@ class Algorithm:
     assert len(self.bounds_min) == self.num_vars
     assert len(self.bounds_max) == self.num_vars
     assert len(self.obj_names) == self.num_obj
+    assert len(self.obj_names) == len(self.obj_types)
     assert len(self.constr_names) == self.num_constr
     assert len(self.var_names) == self.num_vars
     assert len(self.var_names) == len(self.var_types)
@@ -112,7 +124,7 @@ class Algorithm:
     pop = self.archive
     header = self.obj_names + self.constr_names + self.var_names
     output = os.path.join(self.path, 'results')
-    Report(pop, header, self.var_types, output)
+    Report(pop, header, output, self.varmap, self.objmap)
 
   def plot(self):
     pop = self.archive
@@ -129,6 +141,10 @@ class Algorithm:
         (FilterDominated(data), 'blue', 'o'),
         (FilterNonDominated(data), 'red', '^')
       )
+
+      for d, p in zip(data, pop):
+        fitness = list(self.objmap(p.best_fitness))
+        d.best_fitness = [fitness[i] for i in indices]
 
       output = os.path.join(self.path, f'plot{n+1}')
       Plot(dataset, header, output, self.formats)

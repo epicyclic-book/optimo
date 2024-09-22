@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 from matplotlib import pyplot
-import math
 import csv
 
 ##############
@@ -46,7 +45,7 @@ def Plot(dataset, header, output, formats=['png']):
 
   dataset = [s for s in dataset if s[0]]
   for data, color, marker in dataset:
-    points = zip(*(map(abs, p.best_fitness[:n]) for p in data))
+    points = zip(*(p.best_fitness for p in data))
     ax.scatter(*points, c=color, marker=marker)
 
   for fmt in formats:
@@ -56,17 +55,20 @@ def Plot(dataset, header, output, formats=['png']):
 # Report solutions #
 ####################
 
-def Report(pop, header, types, output):
+def Report(pop, header, output, varmap=None, objmap=None):
   with open(f'{output}.csv', 'w', newline='') as f:
     fieldnames = tuple(header) + ('Feasibility', 'Crowding Distance', 'COF')
     writer = csv.DictWriter(f, fieldnames=fieldnames, quoting=csv.QUOTE_ALL)
     writer.writeheader()
 
-    for p in pop:
-      process = lambda v, t: math.ceil(v) if t == 'int' else v
-      position = list(map(process, p.best_position, types))
+    if not varmap:
+      varmap = lambda x: x
+    if not objmap:
+      objmap = lambda x: x
 
-      fitness = list(map(abs, p.best_fitness))
+    for p in pop:
+      position = list(varmap(p.best_position))
+      fitness = list(objmap(p.best_fitness))
       feasibility = int(p.feasibility >= 0)
 
       values = fitness + p.best_constraints + position

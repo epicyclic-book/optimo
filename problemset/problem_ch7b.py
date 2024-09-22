@@ -22,6 +22,13 @@ obj_names = (
   'Lambda ratio'
 )
 
+obj_types = (
+  'min', 'min', 'max',
+  'min', 'min', 'min',
+  'min', 'min',
+  'max'
+)
+
 constr_names = (
   'Top land thickness 1',
   'Top land thickness 2',
@@ -65,6 +72,7 @@ config = {
   'num_archive': 200,
 
   'obj_names': obj_names,
+  'obj_types': obj_types,
   'constr_names': constr_names,
   'var_names': var_names,
   'var_types': var_types,

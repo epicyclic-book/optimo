@@ -27,6 +27,14 @@ obj_names = (
   'Lambda ratio 2'
 )
 
+obj_types = (
+  'min', 'min', 'max',
+  'min', 'min', 'min',
+  'min', 'min',
+  'min', 'min', 'min', 'min',
+  'max', 'max'
+)
+
 constr_names = (
   'Interference 1',
   'Interference 2',
@@ -79,6 +87,7 @@ config = {
   'num_archive': 200,
 
   'obj_names': obj_names,
+  'obj_types': obj_types,
   'constr_names': constr_names,
   'var_names': var_names,
   'var_types': var_types,
