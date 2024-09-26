@@ -144,7 +144,7 @@ class Algorithm:
 
       for d, p in zip(data, pop):
         fitness = list(self.objmap(p.best_fitness))
-        d.best_fitness = [fitness[i] for i in indices]
+        d.best_fitness = [round(fitness[i], 4) for i in indices]
 
       output = os.path.join(self.path, f'plot{n+1}')
       Plot(dataset, header, output, self.formats)
