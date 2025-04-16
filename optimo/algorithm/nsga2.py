@@ -72,6 +72,7 @@ class NSGA2(GeneticAlgorithm):
     self.archive = self.archive + copy.deepcopy(self.population)
     self.archive = self.fill_archive(self.archive)
 
+  # Naive extraction of non-dominated fronts
   def get_fronts(self, pop):
     while len(pop) > 0:
       ComputeDominance(pop)
@@ -81,9 +82,41 @@ class NSGA2(GeneticAlgorithm):
       pop = FilterDominated(pop)
       yield front
 
+  # Fast non-dominated sorting (K. Deb et al. 2002)
+  # https://doi.org/10.1109/4235.996017
+  def get_fronts_fnds(self, pop):
+    size = len(pop)
+    dominance_set = [[] for i in range(size)]
+    dominance_count = [0 for i in range(size)]
+
+    def store(i, j):
+      dominance_set[i].append(j)
+      dominance_count[j] += 1
+
+    ComputeDominance(pop, store)
+
+    current_front = []
+    for i in range(size):
+      if dominance_count[i] == 0:
+        current_front.append(i)
+
+    while len(current_front) > 0:
+      front = [pop[i] for i in current_front]
+      ComputeCrowdingDistance(front)
+      yield front
+
+      next_front = []
+      for i in current_front:
+        for j in dominance_set[i]:
+          dominance_count[j] -= 1
+          if dominance_count[j] == 0:
+            next_front.append(j)
+
+      current_front = next_front
+
   def fill_archive(self, pop):
     archive = []
-    for front in self.get_fronts(pop):
+    for front in self.get_fronts_fnds(pop):
       if len(archive) + len(front) <= self.num_pop:
         archive.extend(front)
       else:

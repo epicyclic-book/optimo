@@ -39,24 +39,28 @@ def Dominates(p, q):
 def Feasibility(p):
   return sum([c for c in p.constraints if c < 0])
 
-def ComputeDominance(pop):
+def ComputeDominance(pop, store = None):
   for p in pop:
     p.is_dominated = False
 
   size = len(pop)
-  for i in range(size-1):
+  for i in range(size):
     for j in range(i+1, size):
       p, q = pop[i], pop[j]
       if p.feasibility >= 0 and q.feasibility >= 0:
         if Dominates(p.best_fitness, q.best_fitness):
           q.is_dominated = True
+          store and store(i, j)
         if Dominates(q.best_fitness, p.best_fitness):
           p.is_dominated = True
+          store and store(j, i)
       else:
         if p.feasibility > q.feasibility:
           q.is_dominated = True
+          store and store(i, j)
         if q.feasibility > p.feasibility:
           p.is_dominated = True
+          store and store(j, i)
 
 def ComputeCrowdingDistance(pop):
   for p in pop:
