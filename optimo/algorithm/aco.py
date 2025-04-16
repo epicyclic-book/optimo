@@ -73,18 +73,18 @@ class ACO(Algorithm):
 
   def init_edges(self):
     self.edges = []
-    for j in range(self.divisions):
+    for node in self.nodes[0]:
       e = Edge()
-      e.next_node = self.nodes[0][j]
+      e.next_node = node
       e.pheromone = 1.0
       self.home.edges.append(e)
       self.edges.append(e)
 
     for i in range(self.num_vars-1):
       for n in self.nodes[i]:
-        for j in range(self.divisions):
+        for node in self.nodes[i+1]:
           e = Edge()
-          e.next_node = self.nodes[i+1][j]
+          e.next_node = node
           e.pheromone = 1.0
           n.edges.append(e)
           self.edges.append(e)
@@ -112,7 +112,7 @@ class ACO(Algorithm):
     node = self.home
     p.path = []
 
-    for j in range(self.num_vars):
+    for i in range(self.num_vars):
       r = SelectEdge(node)
       edge = node.edges[r]
       node = edge.next_node
